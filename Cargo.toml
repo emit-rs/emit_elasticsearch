@@ -1,0 +1,15 @@
+[package]
+name = "emit_elasticsearch"
+version = "0.1.0"
+authors = ["Ashley Mannix <ashleymannix@live.com.au>"]
+
+[dependencies]
+emit = { version = "*", git = "https://github.com/emit-rs/emit.git" }
+serde = "0.7"
+serde_json = "0.7"
+chrono = "0.2"
+hyper = "0.9"
+log = "0.3"
+json_str = "0.2"
+elastic_hyper = "0.2"
+elastic_types = "0.2"
