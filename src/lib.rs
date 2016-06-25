@@ -1,3 +1,7 @@
+//! # `emit_elasticsearch`
+//! 
+//! Log events with the [`emit`](http://emit-rs.github.io/emit/emit/index.html) structured logger to Elasticsearch.
+
 extern crate emit;
 extern crate log;
 extern crate elastic_hyper as elastic;
@@ -32,7 +36,7 @@ pub const DEFAULT_TEMPLATE_FORMAT: &'static str = "%Y%m%d";
 /// An index template that produces index names like `'logs-2016-05-01'`:
 /// 
 /// ```
-/// use emit::collectors::elasticsearch::IndexTemplate;
+/// use emit_elasticsearch::IndexTemplate;
 /// 
 /// let template = IndexTemplate::new("emitlog-", "%Y-%m-%d");
 /// ```
@@ -41,7 +45,7 @@ pub const DEFAULT_TEMPLATE_FORMAT: &'static str = "%Y%m%d";
 /// For example, an index template that produces a unique index name for each month:
 /// 
 /// ```
-/// # use emit::collectors::elasticsearch::*;
+/// # use emit_elasticsearch::IndexTemplate;
 /// let template = IndexTemplate::new("emitlog-", "%Y%m");
 /// ```
 pub struct IndexTemplate {
@@ -143,14 +147,16 @@ mod tests {
     use chrono::UTC;
     use chrono::offset::TimeZone;
     use log;
-    use ::{ events, templates };
+    use emit::{ events, templates };
     use super::{ IndexTemplate, ElasticCollector };
 
     #[test]
     fn events_are_formatted() {
         let timestamp = UTC.ymd(2014, 7, 8).and_hms(9, 10, 11);
-        let mut properties: collections::BTreeMap<&'static str, String> = collections::BTreeMap::new();
-        properties.insert("number", "42".to_owned());
+
+        let mut properties = collections::BTreeMap::new();
+        properties.insert("number", "42".into());
+
         let evt = events::Event::new(timestamp, log::LogLevel::Warn, templates::MessageTemplate::new("The number is {number}"), properties);
 
         //build a bulk call from a slice of Events
