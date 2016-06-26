@@ -11,7 +11,7 @@ extern crate hyper;
 extern crate serde;
 extern crate serde_json;
 
-use std::io::{ Read, Write };
+use std::io::{ Read, Write, Cursor };
 use std::error::Error;
 use emit::events::Event;
 use emit::collectors::AcceptEvents;
@@ -19,8 +19,10 @@ use chrono::{ DateTime, UTC };
 use hyper::client::Body;
 use hyper::header::{ Headers, Connection, Authorization, Scheme };
 use elastic::RequestParams;
+use elastic_types::mapping::ElasticType;
 
 mod events;
+use events::ElasticLog;
 
 pub const LOCAL_SERVER_URL: &'static str = "http://localhost:9200/";
 pub const DEFAULT_TEMPLATE_PREFIX: &'static str = "emitlog-";
@@ -124,6 +126,30 @@ impl ElasticCollector {
     }
 }
 
+fn build_batch(events: &[Event<'static>], template: &IndexTemplate) -> Vec<u8> {
+    //TODO: Optimise this; pre-allocate the buffer and avoid unnecessary writes
+    let mut buf = Cursor::new(Vec::new());
+
+    for evt in events {
+        let idx = template.index(&evt.timestamp());
+        let es_evt = ElasticLog::new(&evt);
+
+        //Writes a header struct of the form: {"index": {"_index":"{}","_type":"{}"}}
+        buf.write_all(b"{\"index\":{\"_index\":\"");
+        buf.write_all(idx.as_bytes());
+        buf.write_all(b"\",\"_type\":\"");
+        buf.write_all(ElasticLog::name().as_bytes());
+        buf.write_all(b"\"}}");
+        buf.write_all(b"\n");
+
+        //Writes the message body to the buffer
+        serde_json::to_writer(&mut buf, &es_evt);
+        buf.write(b"\n");
+    }
+
+    buf.into_inner()
+}
+
 impl Default for ElasticCollector {
     fn default() -> ElasticCollector {
         ElasticCollector::new_local(IndexTemplate::default())
@@ -132,12 +158,9 @@ impl Default for ElasticCollector {
 
 impl AcceptEvents for ElasticCollector {
     fn accept_events(&self, events: &[Event<'static>])-> Result<(), Box<Error>> {
-        //TODO:
-        //Build a buffer
-        //Write events to the buffer:
-        // - bulk header struct
-        // - bulk event struct
-        panic!("implement")
+        let buf = build_batch(events, &self.template);
+        
+        self.send_batch(&buf)
     }
 }
 
@@ -148,20 +171,24 @@ mod tests {
     use chrono::offset::TimeZone;
     use log;
     use emit::{ events, templates };
-    use super::{ IndexTemplate, ElasticCollector };
+    use super::{ IndexTemplate, ElasticCollector, build_batch };
 
     #[test]
-    fn events_are_formatted() {
+    fn events_are_formatted_as_bulk() {
+        let template = IndexTemplate::default();
         let timestamp = UTC.ymd(2014, 7, 8).and_hms(9, 10, 11);
 
         let mut properties = collections::BTreeMap::new();
         properties.insert("number", "42".into());
 
-        let evt = events::Event::new(timestamp, log::LogLevel::Warn, templates::MessageTemplate::new("The number is {number}"), properties);
+        let evts = vec![
+            events::Event::new(timestamp, log::LogLevel::Warn, templates::MessageTemplate::new("The number is {number}"), properties),
+            events::Event::new(timestamp, log::LogLevel::Info, templates::MessageTemplate::new("The number is {number}"), collections::BTreeMap::new())
+        ];
 
-        //build a bulk call from a slice of Events
-        //ensure it has the correct structure
-        //panic!("implement")
+        let bulk = build_batch(&evts, &template);
+
+        assert_eq!(bulk, b"");
     }
 
     #[test]

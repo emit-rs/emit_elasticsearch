@@ -6,6 +6,8 @@ use elastic_types::mapping::prelude::*;
 use elastic_types::date::prelude::*;
 use emit::events;
 
+const TYPENAME: &'static str = "emitlog";
+
 pub struct ElasticLog<'a> {
     timestamp: ElasticDate<EpochMillis>,
     level: LogLevel,
@@ -42,11 +44,11 @@ impl ElasticTypeVisitor for ElasticLogObjectVisitor {
 }
 
 impl serde::ser::MapVisitor for ElasticLogObjectVisitor {
-    fn visit<S>(&mut self, serializer: &mut S) -> Result<Option<()>, S::Error>
-     where S: serde::Serializer {
-            try!(serializer.serialize_struct_elt("timestamp", ElasticDate::<EpochMillis>::mapping()));
-            try!(serializer.serialize_struct_elt("level", String::mapping()));
-            try!(serializer.serialize_struct_elt("message_template", String::mapping()));
+    fn visit<S>(&mut self, serializer: &mut S) -> Result<Option<()>, S::Error> where 
+    S: serde::Serializer {
+        try!(serializer.serialize_struct_elt("timestamp", ElasticDate::<EpochMillis>::mapping()));
+        try!(serializer.serialize_struct_elt("level", String::mapping()));
+        try!(serializer.serialize_struct_elt("message_template", String::mapping()));
         Ok(None)
     }
 }
@@ -73,10 +75,38 @@ impl ElasticFieldMapping<()> for ElasticLogMapping {
     }
 
     fn name() -> &'static str {
-        "emitlog"
+        TYPENAME
     }
 }
 
 impl ElasticUserTypeMapping for ElasticLogMapping {
     type Visitor = ElasticUserTypeMappingVisitor<ElasticLogObjectVisitor>;
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections;
+    use serde_json;
+    use chrono::UTC;
+    use chrono::offset::TimeZone;
+    use log;
+    use emit::{ events, templates };
+    use super::ElasticLog;
+    use ::IndexTemplate;
+
+    #[test]
+    fn events_are_formatted() {
+        let template = IndexTemplate::default();
+        let timestamp = UTC.ymd(2014, 7, 8).and_hms(9, 10, 11);
+
+        let mut properties = collections::BTreeMap::new();
+        properties.insert("number", "42".into());
+
+        let evt = events::Event::new(timestamp, log::LogLevel::Warn, templates::MessageTemplate::new("The number is {number}"), properties);
+        let es_evt = ElasticLog::new(&evt);
+
+        let formatted = serde_json::to_string(&es_evt).unwrap();
+
+        assert_eq!(r#"{}"#, &formatted);
+    }
 }
