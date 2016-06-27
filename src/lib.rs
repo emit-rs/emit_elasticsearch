@@ -85,6 +85,8 @@ impl Default for IndexTemplate {
 }
 
 /// Log collector for Elasticsearch.
+/// 
+/// Logs are written to an index based on their `timestamp` and the given `IndexTemplate`.
 pub struct ElasticCollector {
     params: RequestParams,
     template: IndexTemplate
@@ -114,6 +116,7 @@ impl ElasticCollector {
         self
     }
 
+    /// Send a `_bulk` request represented as a byte buffer to the given node.
     fn send_batch(&self, payload: &[u8]) -> Result<(), Box<Error>> {
         let mut client = hyper::Client::new();
 
@@ -126,15 +129,17 @@ impl ElasticCollector {
     }
 }
 
+/// Build a `_bulk` request as a byte buffer for the given slice of `Event`s.
 fn build_batch(events: &[Event<'static>], template: &IndexTemplate) -> Vec<u8> {
     //TODO: Optimise this; pre-allocate the buffer and avoid unnecessary writes
+    //Bench this function to determine best approaches
     let mut buf = Cursor::new(Vec::new());
 
     for evt in events {
         let idx = template.index(&evt.timestamp());
         let es_evt = ElasticLog::new(&evt);
 
-        //Writes a header struct of the form: {"index": {"_index":"{}","_type":"{}"}}
+        //Writes a header struct of the form: {"index":{"_index":"{}","_type":"{}"}}\n
         buf.write_all(b"{\"index\":{\"_index\":\"");
         buf.write_all(idx.as_bytes());
         buf.write_all(b"\",\"_type\":\"");
