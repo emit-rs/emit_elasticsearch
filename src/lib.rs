@@ -11,6 +11,7 @@ extern crate hyper;
 extern crate serde;
 extern crate serde_json;
 
+use std::str;
 use std::io::{ Read, Write, Cursor };
 use std::error::Error;
 use emit::events::Event;
@@ -171,6 +172,7 @@ impl AcceptEvents for ElasticCollector {
 
 #[cfg(test)]
 mod tests {
+    use std::str;
     use std::collections;
     use chrono::UTC;
     use chrono::offset::TimeZone;
@@ -193,7 +195,7 @@ mod tests {
 
         let bulk = build_batch(&evts, &template);
 
-        assert_eq!(bulk, b"");
+        assert_eq!(str::from_utf8(&bulk).unwrap(), "");
     }
 
     #[test]
