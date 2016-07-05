@@ -1,7 +1,6 @@
 use serde;
 use std::collections;
-use chrono::{ DateTime, UTC };
-use log::LogLevel;
+use emit::LogLevel;
 use elastic_types::mapping::prelude::*;
 use elastic_types::date::prelude::*;
 use emit::events;
@@ -118,24 +117,21 @@ mod tests {
 	use serde_json;
 	use chrono::UTC;
 	use chrono::offset::TimeZone;
-	use log;
-	use emit::{ events, templates };
+	use emit::{ events, templates, LogLevel };
 	use super::ElasticLog;
-	use ::IndexTemplate;
 
 	#[test]
 	fn events_are_formatted() {
-		let template = IndexTemplate::default();
 		let timestamp = UTC.ymd(2014, 7, 8).and_hms(9, 10, 11);
 
 		let mut properties = collections::BTreeMap::new();
 		properties.insert("number", "42".into());
 
-		let evt = events::Event::new(timestamp, log::LogLevel::Warn, templates::MessageTemplate::new("The number is {number}"), properties);
+		let evt = events::Event::new(timestamp, LogLevel::Warn, templates::MessageTemplate::new("The number is {number}"), properties);
 		let es_evt = ElasticLog::new(&evt);
 
 		let formatted = serde_json::to_string(&es_evt).unwrap();
 
-		assert_eq!(r#"{}"#, &formatted);
+		assert_eq!(&formatted, "{\"@t\":\"1404810611000\",\"@lvl\":\"WARN\",\"msg\":\"The number is 42\"}");
 	}
 }

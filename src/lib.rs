@@ -3,7 +3,6 @@
 //! Log events with the [`emit`](http://emit-rs.github.io/emit/emit/index.html) structured logger to Elasticsearch.
 
 extern crate emit;
-extern crate log;
 extern crate elastic_hyper as elastic;
 extern crate elastic_types;
 extern crate chrono;
@@ -12,13 +11,12 @@ extern crate serde;
 extern crate serde_json;
 
 use std::str;
-use std::io::{ Read, Write, Cursor };
+use std::io::{ Write, Cursor };
 use std::error::Error;
 use emit::events::Event;
 use emit::collectors::AcceptEvents;
 use chrono::{ DateTime, UTC };
-use hyper::client::Body;
-use hyper::header::{ Headers, Connection, Authorization, Scheme };
+use hyper::header::{ Headers, Authorization };
 use elastic::RequestParams;
 use elastic_types::mapping::ElasticType;
 
@@ -133,6 +131,7 @@ impl ElasticCollector {
 /// Build a `_bulk` request as a byte buffer for the given slice of `Event`s.
 fn build_batch(events: &[Event<'static>], template: &IndexTemplate) -> Vec<u8> {
     //TODO: Optimise this; pre-allocate the buffer and avoid unnecessary writes
+    //TODO: Handle errors. This _should_ never fail though... (Famous last words)
     //Bench this function to determine best approaches
     let mut buf = Cursor::new(Vec::new());
 
@@ -141,16 +140,16 @@ fn build_batch(events: &[Event<'static>], template: &IndexTemplate) -> Vec<u8> {
         let es_evt = ElasticLog::new(&evt);
 
         //Writes a header struct of the form: {"index":{"_index":"{}","_type":"{}"}}\n
-        buf.write_all(b"{\"index\":{\"_index\":\"");
-        buf.write_all(idx.as_bytes());
-        buf.write_all(b"\",\"_type\":\"");
-        buf.write_all(ElasticLog::name().as_bytes());
-        buf.write_all(b"\"}}");
-        buf.write_all(b"\n");
+        buf.write_all(b"{\"index\":{\"_index\":\"").unwrap();
+        buf.write_all(idx.as_bytes()).unwrap();
+        buf.write_all(b"\",\"_type\":\"").unwrap();
+        buf.write_all(ElasticLog::name().as_bytes()).unwrap();
+        buf.write_all(b"\"}}").unwrap();
+        buf.write_all(b"\n").unwrap();
 
         //Writes the message body to the buffer
-        serde_json::to_writer(&mut buf, &es_evt);
-        buf.write(b"\n");
+        serde_json::to_writer(&mut buf, &es_evt).unwrap();
+        buf.write(b"\n").unwrap();
     }
 
     buf.into_inner()
@@ -176,9 +175,8 @@ mod tests {
     use std::collections;
     use chrono::UTC;
     use chrono::offset::TimeZone;
-    use log;
-    use emit::{ events, templates };
-    use super::{ IndexTemplate, ElasticCollector, build_batch };
+    use emit::{ events, templates, LogLevel };
+    use super::{ IndexTemplate, build_batch };
 
     #[test]
     fn events_are_formatted_as_bulk() {
@@ -189,13 +187,13 @@ mod tests {
         properties.insert("number", "42".into());
 
         let evts = vec![
-            events::Event::new(timestamp, log::LogLevel::Warn, templates::MessageTemplate::new("The number is {number}"), properties),
-            events::Event::new(timestamp, log::LogLevel::Info, templates::MessageTemplate::new("The number is {number}"), collections::BTreeMap::new())
+            events::Event::new(timestamp, LogLevel::Warn, templates::MessageTemplate::new("The number is {number}"), properties),
+            events::Event::new(timestamp, LogLevel::Info, templates::MessageTemplate::new("The number is {number}"), collections::BTreeMap::new())
         ];
 
         let bulk = build_batch(&evts, &template);
 
-        assert_eq!(str::from_utf8(&bulk).unwrap(), "");
+        assert_eq!(str::from_utf8(&bulk).unwrap(), "{\"index\":{\"_index\":\"emitlog-20140708\",\"_type\":\"emitlog\"}}\n{\"@t\":\"1404810611000\",\"@lvl\":\"WARN\",\"msg\":\"The number is 42\"}\n{\"index\":{\"_index\":\"emitlog-20140708\",\"_type\":\"emitlog\"}}\n{\"@t\":\"1404810611000\",\"@lvl\":\"INFO\",\"msg\":\"The number is \"}\n");
     }
 
     #[test]
