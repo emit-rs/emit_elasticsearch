@@ -16,13 +16,13 @@ use std::io::{ Write, Cursor };
 use std::error::Error;
 use emit::events::Event;
 use emit::collectors::AcceptEvents;
+use emit::formatters::WriteEvent;
+use emit::formatters::json::RenderedJsonFormatter;
 use chrono::{ DateTime, UTC };
 use hyper::header::{ Headers, Authorization };
 use elastic::RequestParams;
-use elastic_types::mapping::ElasticType;
 
-mod events;
-use events::ElasticLog;
+mod mapping;
 
 pub const LOCAL_SERVER_URL: &'static str = "http://localhost:9200/";
 pub const DEFAULT_TEMPLATE_PREFIX: &'static str = "emitlog-";
@@ -131,27 +131,25 @@ impl ElasticCollector {
     }
 }
 
+//TODO: Error handling and bench testing
 /// Build a `_bulk` request as a byte buffer for the given slice of `Event`s.
 fn build_batch(events: &[Event<'static>], template: &IndexTemplate) -> Vec<u8> {
-    //TODO: Optimise this; pre-allocate the buffer and avoid unnecessary writes
-    //TODO: Handle errors. This _should_ never fail though... (Famous last words)
-    //Bench this function to determine best approaches
     let mut buf = Cursor::new(Vec::new());
+    let formatter = RenderedJsonFormatter::new();
 
     for evt in events {
         let idx = template.index(&evt.timestamp());
-        let es_evt = ElasticLog::new(&evt);
 
         //Writes a header struct of the form: {"index":{"_index":"{}","_type":"{}"}}\n
         buf.write_all(b"{\"index\":{\"_index\":\"").unwrap();
         buf.write_all(idx.as_bytes()).unwrap();
         buf.write_all(b"\",\"_type\":\"").unwrap();
-        buf.write_all(ElasticLog::name().as_bytes()).unwrap();
+        buf.write_all(mapping::TYPENAME.as_bytes()).unwrap();
         buf.write_all(b"\"}}").unwrap();
         buf.write_all(b"\n").unwrap();
 
         //Writes the message body to the buffer
-        serde_json::to_writer(&mut buf, &es_evt).unwrap();
+        formatter.write_event(&evt, &mut buf).unwrap();
         buf.write(b"\n").unwrap();
     }
 
@@ -197,7 +195,7 @@ mod tests {
 
         let bulk = build_batch(&evts, &template);
 
-        assert_eq!(str::from_utf8(&bulk).unwrap(), "{\"index\":{\"_index\":\"emitlog-20140708\",\"_type\":\"emitlog\"}}\n{\"@t\":\"1404810611000\",\"@lvl\":\"WARN\",\"msg\":\"The number is 42\"}\n{\"index\":{\"_index\":\"emitlog-20140708\",\"_type\":\"emitlog\"}}\n{\"@t\":\"1404810611000\",\"@lvl\":\"INFO\",\"msg\":\"The number is \"}\n");
+        assert_eq!(str::from_utf8(&bulk).unwrap(), "{\"index\":{\"_index\":\"emitlog-20140708\",\"_type\":\"emitlog\"}}\n{\"@t\":\"2014-07-08T09:10:11.000Z\",\"@m\":\"The number is 42\",\"@i\":\"ae9bf784\",\"@l\":\"WARN\",\"number\":42}\n{\"index\":{\"_index\":\"emitlog-20140708\",\"_type\":\"emitlog\"}}\n{\"@t\":\"2014-07-08T09:10:11.000Z\",\"@m\":\"The number is \",\"@i\":\"ae9bf784\"}\n");
     }
 
     #[test]
