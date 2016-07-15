@@ -2,6 +2,7 @@
 //! 
 //! Log events with the [`emit`](http://emit-rs.github.io/emit/emit/index.html) structured logger to Elasticsearch.
 
+#[macro_use]
 extern crate emit;
 extern crate elastic_hyper as elastic;
 extern crate elastic_types;
@@ -91,6 +92,8 @@ pub struct ElasticCollector {
     template: IndexTemplate
 }
 
+unsafe impl Sync for ElasticCollector { }
+
 impl ElasticCollector {
     /// Create a new collector with the given node url and naming template.
     pub fn new<I>(server_url: I, index_template: IndexTemplate) -> ElasticCollector where
@@ -171,12 +174,13 @@ impl AcceptEvents for ElasticCollector {
 
 #[cfg(test)]
 mod tests {
+    use std::env;
     use std::str;
     use std::collections;
     use chrono::UTC;
     use chrono::offset::TimeZone;
-    use emit::{ events, templates, LogLevel };
-    use super::{ IndexTemplate, build_batch };
+    use emit::{ events, templates, LogLevel, PipelineBuilder };
+    use super::{ IndexTemplate, build_batch, ElasticCollector };
 
     #[test]
     fn events_are_formatted_as_bulk() {
@@ -207,5 +211,14 @@ mod tests {
         assert_eq!("testlog-2014", &template_y.index(&date));
         assert_eq!("testlog-201407", &template_ym.index(&date));
         assert_eq!("testlog-20140708", &template_ymd.index(&date));
+    }
+
+    #[test]
+    fn pipeline_example() {
+        let _flush = PipelineBuilder::new()
+            .write_to(ElasticCollector::new_local(IndexTemplate::default()))
+            .init();
+
+        info!("Hello, {} at {} in {}!", name: env::var("USERNAME").unwrap_or("User".to_string()), time: 2139, room: "office");
     }
 }
