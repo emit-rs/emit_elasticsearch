@@ -1,15 +1,16 @@
 //! # `emit_elasticsearch`
 //! 
 //! Log events with the [`emit`](http://emit-rs.github.io/emit/emit/index.html) structured logger to Elasticsearch.
+//! 
+//! # Usage
+//! 
+//! This crate is on [crates.io](http://crates.io/).
 
 #[macro_use]
 extern crate emit;
 extern crate elastic_hyper as elastic;
-extern crate elastic_types;
 extern crate chrono;
 extern crate hyper;
-extern crate serde;
-extern crate serde_json;
 
 use std::str;
 use std::io::{ Write, Cursor };
@@ -21,10 +22,8 @@ use emit::formatters::json::RenderedJsonFormatter;
 use chrono::{ DateTime, UTC };
 use hyper::header::{ Headers, Authorization };
 use elastic::RequestParams;
-use elastic_types::mappers::TypeMapper;
 
-mod mapping;
-
+const TYPENAME: &'static str = "emitlog";
 pub const LOCAL_SERVER_URL: &'static str = "http://localhost:9200/";
 pub const DEFAULT_TEMPLATE_PREFIX: &'static str = "emitlog-";
 pub const DEFAULT_TEMPLATE_FORMAT: &'static str = "%Y%m%d";
@@ -119,10 +118,25 @@ impl ElasticCollector {
         self
     }
 
+    /// Send an index template request to Elasticsearch.
+    /// 
+    /// It's important to call this the before any indices are created, otherwise timestamps
+    /// will be mapped as `string` instead of `date`.
+    pub fn send_template(self) -> Result<ElasticCollector, Box<Error>> {
+        let payload = build_index_template(&self.template);
+
+        let mut client = hyper::Client::new();
+        let res = elastic::indices::put_template::put_name(&mut client, &self.params, "emitlog", &payload[..]);
+
+        match res {
+            Ok(_) => Ok(self),
+            Err(e) => Err(From::from(e))
+        }
+    }
+
     /// Send a `_bulk` request represented as a byte buffer to the given node.
     fn send_batch(&self, payload: &[u8]) -> Result<(), Box<Error>> {
         let mut client = hyper::Client::new();
-
         let res = elastic::bulk::post(&mut client, &self.params, payload);
 
         match res {
@@ -132,8 +146,6 @@ impl ElasticCollector {
     }
 }
 
-//TODO: Error handling and bench testing
-/// Build a `_bulk` request as a byte buffer for the given slice of `Event`s.
 fn build_batch(events: &[Event<'static>], template: &IndexTemplate) -> Vec<u8> {
     let mut buf = Cursor::new(Vec::new());
     let formatter = RenderedJsonFormatter::new();
@@ -145,9 +157,8 @@ fn build_batch(events: &[Event<'static>], template: &IndexTemplate) -> Vec<u8> {
         buf.write_all(b"{\"index\":{\"_index\":\"").unwrap();
         buf.write_all(idx.as_bytes()).unwrap();
         buf.write_all(b"\",\"_type\":\"").unwrap();
-        buf.write_all(mapping::TYPENAME.as_bytes()).unwrap();
-        buf.write_all(b"\"}}").unwrap();
-        buf.write_all(b"\n").unwrap();
+        buf.write_all(TYPENAME.as_bytes()).unwrap();
+        buf.write_all(b"\"}}\n").unwrap();
 
         //Writes the message body to the buffer
         formatter.write_event(&evt, &mut buf).unwrap();
@@ -157,22 +168,15 @@ fn build_batch(events: &[Event<'static>], template: &IndexTemplate) -> Vec<u8> {
     buf.into_inner()
 }
 
-/// Build a `_template` request.
 fn build_index_template(template: &IndexTemplate) -> Vec<u8> {
     let mut buf = Cursor::new(Vec::new());
 
-    //Writes a body like {\"template\":\"testlog-*\",\"mappings\":{\"emitlog\":{\"properties\":{\"@t\":{\"type\":\"date\",\"format\":\"yyyy-MM-ddTHH:mm:ssZ\"}}}}}
+    //Writes a body like {"template":"testlog-*","mappings":{"emitlog":{"properties":{"@t":{"type":"date","format":"yyyy-MM-ddTHH:mm:SSSZ"}}}}}
     buf.write_all(b"{\"template\":\"").unwrap();
     buf.write_all(template.prefix.as_bytes()).unwrap();
-    buf.write_all(b"*").unwrap();
-    buf.write_all(b"\",\"mappings\":{\"").unwrap();
-    buf.write_all(mapping::TYPENAME.as_bytes()).unwrap();
-    buf.write_all(b"\":").unwrap();
-    {
-        let mut ser = serde_json::Serializer::new(&mut buf);
-        TypeMapper::to_writer(mapping::ElasticLogMapping, &mut ser).unwrap();
-    }
-    buf.write_all(b"}}").unwrap();
+    buf.write_all(b"*\",\"mappings\":{\"").unwrap();
+    buf.write_all(TYPENAME.as_bytes()).unwrap();
+    buf.write_all(b"\":{\"properties\":{\"@t\":{\"type\":\"date\",\"format\":\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"}}}}}").unwrap();
 
     buf.into_inner()
 }
@@ -238,13 +242,15 @@ mod tests {
 
         let index = build_index_template(&template);
 
-        assert_eq!(str::from_utf8(&index).unwrap(), "{\"template\":\"testlog-*\",\"mappings\":{\"emitlog\":{\"properties\":{\"@t\":{\"type\":\"date\",\"format\":\"yyyy-MM-ddTHH:mm:ssZ\"}}}}}")
+        assert_eq!(str::from_utf8(&index).unwrap(), "{\"template\":\"testlog-*\",\"mappings\":{\"emitlog\":{\"properties\":{\"@t\":{\"type\":\"date\",\"format\":\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"}}}}}")
     }
 
     #[test]
     fn pipeline_example() {
         let _flush = PipelineBuilder::new()
-            .write_to(ElasticCollector::new_local(IndexTemplate::default()))
+            .write_to(
+                ElasticCollector::new_local(IndexTemplate::default()).send_template().unwrap()
+            )
             .init();
 
         info!("Hello, {} at {} in {}!", name: env::var("USERNAME").unwrap_or("User".to_string()), time: 2139, room: "office");
