@@ -49,16 +49,3 @@ impl ElasticFieldMapping<()> for ElasticLogMapping {
 impl ElasticUserTypeMapping for ElasticLogMapping {
 	type Visitor = ElasticUserTypeMappingVisitor<ElasticLogObjectVisitor>;
 }
-
-#[cfg(test)]
-mod tests {
-	use elastic_types::mappers::TypeMapper;
-	use super::ElasticLogMapping;
-
-	#[test]
-	fn timestamp_has_date_mapping() {
-		let mapping = TypeMapper::to_string(ElasticLogMapping).unwrap();
-
-		assert_eq!(&mapping, "{\"properties\":{\"@t\":{\"type\":\"date\",\"format\":\"yyyy-MM-ddTHH:mm:ssZ\"}}}");
-	}
-}

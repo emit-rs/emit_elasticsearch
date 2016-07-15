@@ -21,6 +21,7 @@ use emit::formatters::json::RenderedJsonFormatter;
 use chrono::{ DateTime, UTC };
 use hyper::header::{ Headers, Authorization };
 use elastic::RequestParams;
+use elastic_types::mappers::TypeMapper;
 
 mod mapping;
 
@@ -156,6 +157,26 @@ fn build_batch(events: &[Event<'static>], template: &IndexTemplate) -> Vec<u8> {
     buf.into_inner()
 }
 
+/// Build a `_template` request.
+fn build_index_template(template: &IndexTemplate) -> Vec<u8> {
+    let mut buf = Cursor::new(Vec::new());
+
+    //Writes a body like {\"template\":\"testlog-*\",\"mappings\":{\"emitlog\":{\"properties\":{\"@t\":{\"type\":\"date\",\"format\":\"yyyy-MM-ddTHH:mm:ssZ\"}}}}}
+    buf.write_all(b"{\"template\":\"").unwrap();
+    buf.write_all(template.prefix.as_bytes()).unwrap();
+    buf.write_all(b"*").unwrap();
+    buf.write_all(b"\",\"mappings\":{\"").unwrap();
+    buf.write_all(mapping::TYPENAME.as_bytes()).unwrap();
+    buf.write_all(b"\":").unwrap();
+    {
+        let mut ser = serde_json::Serializer::new(&mut buf);
+        TypeMapper::to_writer(mapping::ElasticLogMapping, &mut ser).unwrap();
+    }
+    buf.write_all(b"}}").unwrap();
+
+    buf.into_inner()
+}
+
 impl Default for ElasticCollector {
     fn default() -> ElasticCollector {
         ElasticCollector::new_local(IndexTemplate::default())
@@ -178,7 +199,7 @@ mod tests {
     use chrono::UTC;
     use chrono::offset::TimeZone;
     use emit::{ events, templates, LogLevel, PipelineBuilder };
-    use super::{ IndexTemplate, build_batch, ElasticCollector };
+    use super::{ IndexTemplate, build_batch, build_index_template, ElasticCollector };
 
     #[test]
     fn events_are_formatted_as_bulk() {
@@ -209,6 +230,15 @@ mod tests {
         assert_eq!("testlog-2014", &template_y.index(&date));
         assert_eq!("testlog-201407", &template_ym.index(&date));
         assert_eq!("testlog-20140708", &template_ymd.index(&date));
+    }
+
+    #[test]
+    fn can_build_index_template() {
+        let template = IndexTemplate::new("testlog-", "%Y%m%d");
+
+        let index = build_index_template(&template);
+
+        assert_eq!(str::from_utf8(&index).unwrap(), "{\"template\":\"testlog-*\",\"mappings\":{\"emitlog\":{\"properties\":{\"@t\":{\"type\":\"date\",\"format\":\"yyyy-MM-ddTHH:mm:ssZ\"}}}}}")
     }
 
     #[test]
