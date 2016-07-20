@@ -2,9 +2,72 @@
 //! 
 //! Log events with the [`emit`](http://emit-rs.github.io/emit/emit/index.html) structured logger to Elasticsearch.
 //! 
+//! This is a lightweight `Collector` that indexes events in a timestamped index with a `_bulk` command.
+//! The template format can be changed by specifying an `IndexTemplate`, but the log type will always
+//! be `emitlog`.
+//! Logged events should play nice with [kibana](http://elastic.co) out-of-the-box.
+//! 
 //! # Usage
 //! 
-//! This crate is on [crates.io](http://crates.io/).
+//! Reference `emit_elasticsearch` in your `Cargo.toml`:
+//! 
+//! ```no_run
+//! [dependencies]
+//! emit = "*"
+//! emit_elasticsearch = "*"
+//! ```
+//! 
+//! Log to Elasticsearch by adding an `ElasticCollector` to your pipeline:
+//! 
+//! ```
+//! #[macro_use]
+//! extern crate emit;
+//! extern crate emit_elasticsearch;
+//! 
+//! use emit_elasticsearch::prelude::*;
+//! 
+//! # fn main() {
+//! let pipeline = PipelineBuilder::new()
+//!     .write_to(
+//!         ElasticCollector::default()
+//!         .send_template().unwrap())
+//!     .init();
+//! # }
+//! ```
+//! 
+//! The call to `.send_template` is optional, and will ensure you have an `index_template` in Elasticsearch to map
+//! events correctly.
+//! 
+//! Events are formatted using the `RenderedJsonFormatter`.
+//! So a warning log with a template `"The number is {number}"` will produce a result like the following:
+//! 
+//! ```
+//! # use std::io::Write;
+//! # use std::collections::BTreeMap;
+//! # #[macro_use]
+//! # extern crate json_str;
+//! # extern crate chrono;
+//! # extern crate emit;
+//! # use emit::formatters::json::RenderedJsonFormatter;
+//! # use emit::events::Event;
+//! # fn main() {
+//! # let formatter = RenderedJsonFormatter::new();
+//! # let mut properties = collections::BTreeMap::new();
+//! # properties.insert("number", "42".into());
+//! # let evt = Event::new(timestamp, emit::LogLevel::Warn, emit::templates::MessageTemplate::new("The number is {number}"), properties);
+//! # let mut fmtd = String::new();
+//! # formatter.write_event(&evt, &mut fmtd);
+//! # assert_eq!(&fmtd, json_str!(
+//! {
+//!     "@t": "2014-07-08T09:10:11.000Z",
+//!     "@m": "The number is 42",
+//!     "@i": "ae9bf784",
+//!     "@l": "WARN",
+//!     "number":42
+//! }
+//! # ));
+//! # }
+//! ```
 
 #[macro_use]
 extern crate emit;
@@ -23,9 +86,26 @@ use chrono::{ DateTime, UTC };
 use hyper::header::{ Headers, Authorization };
 use elastic::RequestParams;
 
-const TYPENAME: &'static str = "emitlog";
+pub mod prelude {
+    pub use super::{ 
+        LOCAL_SERVER_URL, 
+        DEFAULT_TEMPLATE_PREFIX, 
+        DEFAULT_TEMPLATE_FORMAT, 
+        IndexTemplate, 
+        ElasticCollector 
+    };
+}
+
+/// The value of `_type` used for indexed logs.
+pub const TYPENAME: &'static str = "emitlog";
+
+/// The default address for a local Elasticsearch node.
 pub const LOCAL_SERVER_URL: &'static str = "http://localhost:9200/";
+
+/// The default index template prefix for log indices.
 pub const DEFAULT_TEMPLATE_PREFIX: &'static str = "emitlog-";
+
+/// The default date format appended to the prefix for log indices.
 pub const DEFAULT_TEMPLATE_FORMAT: &'static str = "%Y%m%d";
 
 /// Template for naming log indices.
@@ -38,9 +118,8 @@ pub const DEFAULT_TEMPLATE_FORMAT: &'static str = "%Y%m%d";
 /// An index template that produces index names like `'logs-2016-05-01'`:
 /// 
 /// ```
-/// use emit_elasticsearch::IndexTemplate;
-/// 
-/// let template = IndexTemplate::new("emitlog-", "%Y-%m-%d");
+/// # use emit_elasticsearch::IndexTemplate;
+/// let template = IndexTemplate::new("logs-", "%Y-%m-%d");
 /// ```
 /// 
 /// Use the `date_format` parameter to control how the event date is resolved to an index name.
@@ -50,12 +129,17 @@ pub const DEFAULT_TEMPLATE_FORMAT: &'static str = "%Y%m%d";
 /// # use emit_elasticsearch::IndexTemplate;
 /// let template = IndexTemplate::new("emitlog-", "%Y%m");
 /// ```
+/// 
+/// The `ElasticCollector` will append `*` to the end of your `IndexTemplate.prefix` when inserting an
+/// in Elasticsearch.
+/// So the above examples will both use `"emitlog-*"` as the `template` value in the call to `index_template`.
 pub struct IndexTemplate {
     prefix: String,
     date_format: String
 }
 
 impl IndexTemplate {
+    /// Create an index template with the given `prefix` and `date_format`.
     pub fn new<I>(prefix: I, date_format: I) -> IndexTemplate where
     I: Into<String> {
         IndexTemplate {
@@ -64,6 +148,23 @@ impl IndexTemplate {
         }
     }
 
+    /// Get the index name for a given timestamp.
+    /// 
+    /// This will use the `date_format` to format the timestamp and append it to the `prefix`.
+    /// So a template with a prefix of `"testlog-"` and format of `"%Y%m%d"` will produce index
+    /// names like the following:
+    /// 
+    /// ```
+    /// # extern crate emit_elasticsearch;
+    /// # extern crate chrono;
+    /// # fn main() {
+    /// # let template = IndexTemplate::new("testlog-", "%Y%m%d");
+    /// # let date = UTC.ymd(2014, 7, 8).and_hms(9, 10, 11);
+    /// # assert_eq!(
+    /// "testlog-20140708"
+    /// # , &template_ymd.index(&date));
+    /// # }
+    /// ```
     pub fn index(&self, date: &DateTime<UTC>) -> String {
         let df = date.format(&self.date_format).to_string();
 
@@ -120,8 +221,11 @@ impl ElasticCollector {
 
     /// Send an index template request to Elasticsearch.
     /// 
-    /// It's important to call this the before any indices are created, otherwise timestamps
+    /// It's important to call this the before any events are logged, otherwise timestamps
     /// will be mapped as `string` instead of `date`.
+    /// 
+    /// Because this method returns `Result<ElasticCollector>`, you'll need to handle any
+    /// potential `Hyper::Error`s.
     pub fn send_template(self) -> Result<ElasticCollector, Box<Error>> {
         let payload = build_index_template(&self.template);
 
@@ -134,7 +238,6 @@ impl ElasticCollector {
         }
     }
 
-    /// Send a `_bulk` request represented as a byte buffer to the given node.
     fn send_batch(&self, payload: &[u8]) -> Result<(), Box<Error>> {
         let mut client = hyper::Client::new();
         let res = elastic::bulk::post(&mut client, &self.params, payload);
@@ -143,6 +246,12 @@ impl ElasticCollector {
             Ok(_) => Ok(()),
             Err(e) => Err(From::from(e))
         }
+    }
+}
+
+impl Default for ElasticCollector {
+    fn default() -> Self {
+        ElasticCollector::new_local(IndexTemplate::default())
     }
 }
 
@@ -179,12 +288,6 @@ fn build_index_template(template: &IndexTemplate) -> Vec<u8> {
     buf.write_all(b"\":{\"properties\":{\"@t\":{\"type\":\"date\",\"format\":\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"}}}}}").unwrap();
 
     buf.into_inner()
-}
-
-impl Default for ElasticCollector {
-    fn default() -> ElasticCollector {
-        ElasticCollector::new_local(IndexTemplate::default())
-    }
 }
 
 impl AcceptEvents for ElasticCollector {
@@ -249,7 +352,7 @@ mod tests {
     fn pipeline_example() {
         let _flush = PipelineBuilder::new()
             .write_to(
-                ElasticCollector::new_local(IndexTemplate::default()).send_template().unwrap()
+                ElasticCollector::default().send_template().unwrap()
             )
             .init();
 
