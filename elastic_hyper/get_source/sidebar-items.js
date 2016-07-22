@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["get_index_type_id",""]]});

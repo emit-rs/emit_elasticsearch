@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["cancel","http://www.elastic.co/guide/en/elasticsearch/reference/master/tasks-cancel.html"],["list","http://www.elastic.co/guide/en/elasticsearch/reference/master/tasks.html"]]});

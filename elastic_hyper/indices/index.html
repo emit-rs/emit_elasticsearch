@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `indices` mod in crate `elastic_hyper`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, indices">
+
+    <title>elastic_hyper::indices - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>elastic_hyper</a></p><script>window.sidebarCurrent = {name: 'indices', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>elastic_hyper</a>::<wbr><a class='mod' href=''>indices</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-1023' class='srclink' href='../../src/elastic_hyper/api/indices/mod.rs.html#1-34' title='goto source code'>[src]</a></span></h1>
+<h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='analyze/index.html'
+                                  title='elastic_hyper::indices::analyze'>analyze</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-analyze.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-analyze.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='clear_cache/index.html'
+                                  title='elastic_hyper::indices::clear_cache'>clear_cache</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-clearcache.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-clearcache.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='close/index.html'
+                                  title='elastic_hyper::indices::close'>close</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-open-close.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-open-close.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='create/index.html'
+                                  title='elastic_hyper::indices::create'>create</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-create-index.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-create-index.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='delete/index.html'
+                                  title='elastic_hyper::indices::delete'>delete</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-delete-index.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-delete-index.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='delete_alias/index.html'
+                                  title='elastic_hyper::indices::delete_alias'>delete_alias</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='delete_template/index.html'
+                                  title='elastic_hyper::indices::delete_template'>delete_template</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='exists/index.html'
+                                  title='elastic_hyper::indices::exists'>exists</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-exists.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-exists.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='exists_alias/index.html'
+                                  title='elastic_hyper::indices::exists_alias'>exists_alias</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='exists_template/index.html'
+                                  title='elastic_hyper::indices::exists_template'>exists_template</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='exists_type/index.html'
+                                  title='elastic_hyper::indices::exists_type'>exists_type</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-types-exists.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-types-exists.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='flush/index.html'
+                                  title='elastic_hyper::indices::flush'>flush</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-flush.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-flush.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='flush_synced/index.html'
+                                  title='elastic_hyper::indices::flush_synced'>flush_synced</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-synced-flush.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-synced-flush.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='forcemerge/index.html'
+                                  title='elastic_hyper::indices::forcemerge'>forcemerge</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-forcemerge.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-forcemerge.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='get/index.html'
+                                  title='elastic_hyper::indices::get'>get</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-index.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-index.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='get_alias/index.html'
+                                  title='elastic_hyper::indices::get_alias'>get_alias</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='get_field_mapping/index.html'
+                                  title='elastic_hyper::indices::get_field_mapping'>get_field_mapping</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-field-mapping.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-field-mapping.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='get_mapping/index.html'
+                                  title='elastic_hyper::indices::get_mapping'>get_mapping</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-mapping.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-mapping.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='get_settings/index.html'
+                                  title='elastic_hyper::indices::get_settings'>get_settings</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-settings.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-settings.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='get_template/index.html'
+                                  title='elastic_hyper::indices::get_template'>get_template</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='get_upgrade/index.html'
+                                  title='elastic_hyper::indices::get_upgrade'>get_upgrade</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-upgrade.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-upgrade.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='open/index.html'
+                                  title='elastic_hyper::indices::open'>open</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-open-close.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-open-close.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='put_alias/index.html'
+                                  title='elastic_hyper::indices::put_alias'>put_alias</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='put_mapping/index.html'
+                                  title='elastic_hyper::indices::put_mapping'>put_mapping</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-put-mapping.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-put-mapping.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='put_settings/index.html'
+                                  title='elastic_hyper::indices::put_settings'>put_settings</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='put_template/index.html'
+                                  title='elastic_hyper::indices::put_template'>put_template</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='recovery/index.html'
+                                  title='elastic_hyper::indices::recovery'>recovery</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-recovery.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-recovery.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='refresh/index.html'
+                                  title='elastic_hyper::indices::refresh'>refresh</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-refresh.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-refresh.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='segments/index.html'
+                                  title='elastic_hyper::indices::segments'>segments</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-segments.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-segments.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='shard_stores/index.html'
+                                  title='elastic_hyper::indices::shard_stores'>shard_stores</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shards-stores.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shards-stores.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='stats/index.html'
+                                  title='elastic_hyper::indices::stats'>stats</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-stats.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-stats.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='update_aliases/index.html'
+                                  title='elastic_hyper::indices::update_aliases'>update_aliases</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='upgrade/index.html'
+                                  title='elastic_hyper::indices::upgrade'>upgrade</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-upgrade.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-upgrade.html</a></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='validate_query/index.html'
+                                  title='elastic_hyper::indices::validate_query'>validate_query</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/search-validate.html">http://www.elastic.co/guide/en/elasticsearch/reference/master/search-validate.html</a></p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "elastic_hyper";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

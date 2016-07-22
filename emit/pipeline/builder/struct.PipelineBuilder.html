@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `PipelineBuilder` struct in crate `emit`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, PipelineBuilder">
+
+    <title>emit::pipeline::builder::PipelineBuilder - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>emit</a>::<wbr><a href='../index.html'>pipeline</a>::<wbr><a href='index.html'>builder</a></p><script>window.sidebarCurrent = {name: 'PipelineBuilder', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>emit</a>::<wbr><a href='../index.html'>pipeline</a>::<wbr><a href='index.html'>builder</a>::<wbr><a class='struct' href=''>PipelineBuilder</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-295' class='srclink' href='../../../src/emit/pipeline/builder.rs.html#20-25' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct PipelineBuilder {
+    // some fields omitted
+}</pre><div class='docblock'><p><code>PipelineBuilder</code> creates an event emitting pipeline. Calling <code>init()</code> will install the pipeline globally
+for use by the <code>emit!()</code> family of macros. Calling <code>detach()</code> will return an independent pipeline that
+can be used in isolation.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../../../emit/pipeline/builder/struct.PipelineBuilder.html' title='emit::pipeline::builder::PipelineBuilder'>PipelineBuilder</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-300' class='srclink' href='../../../src/emit/pipeline/builder.rs.html#27-79' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../emit/pipeline/builder/struct.PipelineBuilder.html' title='emit::pipeline::builder::PipelineBuilder'>PipelineBuilder</a></code></h4>
+<h4 id='method.at_level' class='method'><code>fn <a href='#method.at_level' class='fnname'>at_level</a>(self, level: <a class='enum' href='../../../emit/enum.LogLevelFilter.html' title='emit::LogLevelFilter'>LogLevelFilter</a>) -&gt; Self</code></h4>
+<div class='docblock'><p>Set the logging level used by the pipeline. The default is <code>LogLevelFilter::Info</code>.</p>
+</div><h4 id='method.pipe' class='method'><code>fn <a href='#method.pipe' class='fnname'>pipe</a>(self, element: <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../emit/pipeline/chain/trait.Propagate.html' title='emit::pipeline::chain::Propagate'>Propagate</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html' title='core::marker::Sync'>Sync</a>&gt;) -&gt; Self</code></h4>
+<div class='docblock'><p>Add a processing element to the pipeline. Elements run in the order in which they
+are added, so the output of one <code>pipe()</code>d element is fed into the next.</p>
+</div><h4 id='method.write_to' class='method'><code>fn <a href='#method.write_to' class='fnname'>write_to</a>&lt;T:&nbsp;<a class='trait' href='../../../emit/collectors/trait.AcceptEvents.html' title='emit::collectors::AcceptEvents'>AcceptEvents</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html' title='core::marker::Sync'>Sync</a> + 'static&gt;(self, collector: T) -&gt; Self</code></h4>
+<div class='docblock'><p>Write to a collector, synchronously.</p>
+</div><h4 id='method.send_to' class='method'><code>fn <a href='#method.send_to' class='fnname'>send_to</a>&lt;T:&nbsp;<a class='trait' href='../../../emit/collectors/trait.AcceptEvents.html' title='emit::collectors::AcceptEvents'>AcceptEvents</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + 'static&gt;(self, collector: T) -&gt; Self</code></h4>
+<div class='docblock'><p>Send events to a collector, asynchronously. At present only one collector may receive events this way.</p>
+</div><h4 id='method.detach' class='method'><code>fn <a href='#method.detach' class='fnname'>detach</a>(self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='struct' href='../../../emit/pipeline/reference/struct.PipelineRef.html' title='emit::pipeline::reference::PipelineRef'>PipelineRef</a>, <a class='struct' href='../../../emit/pipeline/builder/struct.AsyncFlushHandle.html' title='emit::pipeline::builder::AsyncFlushHandle'>AsyncFlushHandle</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a></code></h4>
+<div class='docblock'><p>Build the pipeline, but don&#39;t globally install it.</p>
+</div><h4 id='method.init' class='method'><code>fn <a href='#method.init' class='fnname'>init</a>(self) -&gt; <a class='struct' href='../../../emit/pipeline/builder/struct.AsyncFlushHandle.html' title='emit::pipeline::builder::AsyncFlushHandle'>AsyncFlushHandle</a></code></h4>
+<div class='docblock'><p>Build and globally install the pipeline so that the <code>emit!()</code> macros can call it.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "emit";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

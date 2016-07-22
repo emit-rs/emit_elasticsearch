@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["hot_threads","http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-hot-threads.html"],["info","http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-info.html"],["stats","http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-stats.html"]]});

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `emit_elasticsearch` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, emit_elasticsearch">
+
+    <title>emit_elasticsearch - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'emit_elasticsearch', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>emit_elasticsearch</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/emit_elasticsearch/src/lib.rs.html#1-367' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'>
+<h1 id='emit_elasticsearch' class='section-header'><a href='#emit_elasticsearch'><code>emit_elasticsearch</code></a></h1>
+<p>Log events with the <a href="http://emit-rs.github.io/emit/emit/index.html"><code>emit</code></a> structured logger to Elasticsearch.</p>
+
+<p>This is a lightweight <code>Collector</code> that indexes events in a timestamped index with a <code>_bulk</code> command.
+The template format can be changed by specifying an <code>IndexTemplate</code>, but the log type will always
+be <code>emitlog</code>.
+Logged events should play nice with <a href="http://elastic.co">kibana</a> out-of-the-box.</p>
+
+<h1 id='usage' class='section-header'><a href='#usage'>Usage</a></h1>
+<p>Reference <code>emit_elasticsearch</code> in your <code>Cargo.toml</code>:</p>
+
+<pre><code class="language-norun">[dependencies]
+emit = &quot;*&quot;
+emit_elasticsearch = &quot;*&quot;
+</code></pre>
+
+<p>Log to Elasticsearch by adding an <code>ElasticCollector</code> to your pipeline:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>emit</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>emit_elasticsearch</span>;
+ 
+<span class='kw'>use</span> <span class='ident'>emit</span>::<span class='ident'>PipelineBuilder</span>;
+<span class='kw'>use</span> <span class='ident'>emit_elasticsearch</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
+ 
+<span class='kw'>let</span> <span class='ident'>pipeline</span> <span class='op'>=</span> <span class='ident'>PipelineBuilder</span>::<span class='ident'>new</span>()
+    .<span class='ident'>write_to</span>(
+        <span class='ident'>ElasticCollector</span>::<span class='ident'>default</span>()
+        .<span class='ident'>send_template</span>().<span class='ident'>unwrap</span>())
+    .<span class='ident'>init</span>();</pre>
+
+<p>The call to <code>.send_template</code> is optional, and will ensure you have an <code>index_template</code> in Elasticsearch to map
+events correctly.</p>
+
+<p>Events are formatted using the <code>RenderedJsonFormatter</code>.
+So a warning log with a template <code>&quot;The number is {number}&quot;</code> will produce a result like the following:</p>
+
+<pre class='rust rust-example-rendered'>
+{
+    <span class='string'>&quot;@t&quot;</span>: <span class='string'>&quot;2014-07-08T09:10:11.000Z&quot;</span>,
+    <span class='string'>&quot;@m&quot;</span>: <span class='string'>&quot;The number is 42&quot;</span>,
+    <span class='string'>&quot;@i&quot;</span>: <span class='string'>&quot;ae9bf784&quot;</span>,
+    <span class='string'>&quot;@l&quot;</span>: <span class='string'>&quot;WARN&quot;</span>,
+    <span class='string'>&quot;number&quot;</span>:<span class='number'>42</span>
+}</pre>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='prelude/index.html'
+                                  title='emit_elasticsearch::prelude'>prelude</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ElasticCollector.html'
+                                  title='emit_elasticsearch::ElasticCollector'>ElasticCollector</a></td>
+                           <td class='docblock short'>
+                                <p>Log collector for Elasticsearch.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.IndexTemplate.html'
+                                  title='emit_elasticsearch::IndexTemplate'>IndexTemplate</a></td>
+                           <td class='docblock short'>
+                                <p>Template for naming log indices.</p>
+                           </td>
+                       </tr></table><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.DEFAULT_TEMPLATE_FORMAT.html'
+                                  title='emit_elasticsearch::DEFAULT_TEMPLATE_FORMAT'>DEFAULT_TEMPLATE_FORMAT</a></td>
+                           <td class='docblock short'>
+                                <p>The default date format appended to the prefix for log indices.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.DEFAULT_TEMPLATE_PREFIX.html'
+                                  title='emit_elasticsearch::DEFAULT_TEMPLATE_PREFIX'>DEFAULT_TEMPLATE_PREFIX</a></td>
+                           <td class='docblock short'>
+                                <p>The default index template prefix for log indices.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.LOCAL_SERVER_URL.html'
+                                  title='emit_elasticsearch::LOCAL_SERVER_URL'>LOCAL_SERVER_URL</a></td>
+                           <td class='docblock short'>
+                                <p>The default address for a local Elasticsearch node.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.TYPENAME.html'
+                                  title='emit_elasticsearch::TYPENAME'>TYPENAME</a></td>
+                           <td class='docblock short'>
+                                <p>The value of <code>_type</code> used for indexed logs.</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "emit_elasticsearch";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

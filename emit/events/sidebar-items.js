@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Value","Currently just used as a marker; plan is to adopt the same scheme as serde_json's Value: https://github.com/serde-rs/json/blob/master/json/src/value.rs"]],"struct":[["Event",""]]});
