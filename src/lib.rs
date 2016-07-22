@@ -11,7 +11,7 @@
 //! 
 //! Reference `emit_elasticsearch` in your `Cargo.toml`:
 //! 
-//! ```no_run
+//! ```norun
 //! [dependencies]
 //! emit = "*"
 //! emit_elasticsearch = "*"
@@ -24,6 +24,7 @@
 //! extern crate emit;
 //! extern crate emit_elasticsearch;
 //! 
+//! use emit::PipelineBuilder;
 //! use emit_elasticsearch::prelude::*;
 //! 
 //! # fn main() {
@@ -42,22 +43,25 @@
 //! So a warning log with a template `"The number is {number}"` will produce a result like the following:
 //! 
 //! ```
-//! # use std::io::Write;
+//! # use std::str;
+//! # use std::io::{ self, Write };
 //! # use std::collections::BTreeMap;
+//! # use emit::formatters::WriteEvent;
 //! # #[macro_use]
 //! # extern crate json_str;
 //! # extern crate chrono;
+//! # use chrono::{ UTC, TimeZone, };
 //! # extern crate emit;
 //! # use emit::formatters::json::RenderedJsonFormatter;
 //! # use emit::events::Event;
 //! # fn main() {
 //! # let formatter = RenderedJsonFormatter::new();
-//! # let mut properties = collections::BTreeMap::new();
+//! # let mut properties = BTreeMap::new();
 //! # properties.insert("number", "42".into());
-//! # let evt = Event::new(timestamp, emit::LogLevel::Warn, emit::templates::MessageTemplate::new("The number is {number}"), properties);
-//! # let mut fmtd = String::new();
+//! # let evt = Event::new(UTC.ymd(2014, 7, 8).and_hms(9, 10, 11), emit::LogLevel::Warn, emit::templates::MessageTemplate::new("The number is {number}"), properties);
+//! # let mut fmtd = io::Cursor::new(Vec::new());
 //! # formatter.write_event(&evt, &mut fmtd);
-//! # assert_eq!(&fmtd, json_str!(
+//! # assert_eq!(str::from_utf8(&fmtd.into_inner()).unwrap(), json_str!(
 //! {
 //!     "@t": "2014-07-08T09:10:11.000Z",
 //!     "@m": "The number is 42",
@@ -157,12 +161,14 @@ impl IndexTemplate {
     /// ```
     /// # extern crate emit_elasticsearch;
     /// # extern crate chrono;
+    /// # use chrono::{ UTC, TimeZone, };
+    /// # use emit_elasticsearch::IndexTemplate;
     /// # fn main() {
     /// # let template = IndexTemplate::new("testlog-", "%Y%m%d");
     /// # let date = UTC.ymd(2014, 7, 8).and_hms(9, 10, 11);
     /// # assert_eq!(
     /// "testlog-20140708"
-    /// # , &template_ymd.index(&date));
+    /// # , &template.index(&date));
     /// # }
     /// ```
     pub fn index(&self, date: &DateTime<UTC>) -> String {

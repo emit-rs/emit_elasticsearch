@@ -8,3 +8,6 @@ emit = { version = "*", git = "https://github.com/emit-rs/emit.git" }
 chrono = "0.2"
 hyper = "0.9"
 elastic_hyper = "0.2"
+
+[dev-dependencies]
+json_str = "*"
