@@ -36,4 +36,4 @@ let pipeline = PipelineBuilder::new()
 # }
 ```
 
-![Event in es](https://raw.githubusercontent.com/KodrAus/emit_elasticsearch/master/assets/events_in_es.png)
+![Event in es](https://github.com/KodrAus/emit_elasticsearch/blob/master/assets/event_in_es.png)
