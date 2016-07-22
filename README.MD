@@ -27,13 +27,11 @@ extern crate emit_elasticsearch;
 use emit::PipelineBuilder;
 use emit_elasticsearch::prelude::*;
 
-# fn main() {
 let pipeline = PipelineBuilder::new()
     .write_to(
         ElasticCollector::default()
         .send_template().unwrap())
     .init();
-# }
 ```
 
 ![Event in es](https://github.com/KodrAus/emit_elasticsearch/blob/master/assets/event_in_es.png)
