@@ -1,3 +1,5 @@
+> **Archived:** This project is based on the old `0.10.x` version of `emit` and isn't compatible with newer versions.
+
 # `emit_elasticsearch` [![Documentation](https://img.shields.io/badge/docs-rustdoc-orange.svg)](https://emit-rs.github.io/emit_elasticsearch/emit_elasticsearch/)
 
 Log events with the [`emit`](http://emit-rs.github.io/emit/emit/index.html) structured logger to Elasticsearch.
